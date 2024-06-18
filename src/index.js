@@ -29,6 +29,25 @@ async function loadContextState(browser) {
   }
 }
 
+async function loadWebWhatsApp() {
+  const browser = await chromium.launch({ headless: false })
+  const context = await browser.newContext()
+  // const context = await loadContextState(browser)
+  const page = await context.newPage()
+
+  await page.goto("https://web.whatsapp.com")
+
+  await page.waitForSelector('canvas[aria-label="Scan me!"]', {
+    state: "hidden",
+  })
+
+  // await page.waitForSelector("#pane-side", { timeout: 60000 })
+  // await saveContextState(context)
+  // await browser.close()
+
+  return { browser, context, page }
+}
+
 async function sendMessagesWithImage({ phoneNumbers, message, imagePath }) {
   try {
     const browser = await chromium.launch({ headless: false }) // Abre el navegador en modo no-cabeza para que puedas ver el proceso
@@ -46,10 +65,14 @@ async function sendMessagesWithImage({ phoneNumbers, message, imagePath }) {
     await page.waitForSelector("#pane-side", { timeout: 60000 })
     // await saveContextState(context)
 
+    // const { browser, context, page } = await loadWebWhatsApp()
+
     for (const phoneNumber of phoneNumbers) {
       let numberLink = `https://web.whatsapp.com/send?phone=${phoneNumber}`
-      await page.goto(numberLink)
-
+      // await page.goto(numberLink)
+      await page.evaluate((url) => {
+        window.history.pushState({}, "", url)
+      }, numberLink)
       await page.waitForSelector("#main", { timeout: 60000 })
 
       if (imagePath) {
@@ -146,9 +169,9 @@ async function sendMessages({ phoneNumbers, message }) {
   }
 }
 
-// sendMessagesWithImage({
-//   phoneNumbers: ["573185003169", "573125749446"],
-//   message:
-//     "Hola, ¿cómo estás? Esto es una prueba de un mensaje enviado desde un script de Node.js",
-//   imagePath: "public/img.png",
-// })
+sendMessagesWithImage({
+  phoneNumbers: ["573185003169", "573185003169"],
+  message:
+    "Hola, ¿cómo estás? Esto es una prueba de un mensaje enviado desde un script de Node.js",
+  imagePath: "public/img.png",
+})
