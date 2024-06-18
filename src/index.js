@@ -100,9 +100,14 @@ async function sendMessagesWithImage({ phoneNumbers, message, imagePath }) {
                 throw new Error("No se encontró el campo de texto del chat")
 
               await textarea.focus()
-              await page.keyboard.type(message).then(async () => {
+              // Enviar mensaje pegado
+              await page.keyboard.insertText(message).then(async () => {
                 await sendImageButton.click()
               })
+              // Enviar mensaje tipeado
+              // await page.keyboard.type(message).then(async () => {
+              //   await sendImageButton.click()
+              // })
             }
           } else {
             throw new Error("No se encontró el botón de enviar la imagen")
